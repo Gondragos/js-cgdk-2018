@@ -39,10 +39,17 @@ module.exports.connect = function connect(host, port, onConnect) {
         process.exit();
     });
 
+    let tickData = '';
     function dataHandler(data) {
         busy = true;
         if (data) {
-            strBuffer = strBuffer.concat(data.toString().split("\n").filter((item) => { return item.length }));
+            // sometimes we get tick data by parts 
+            tickData = tickData + data.toString();
+            // tickData is complete when we get '\n'
+            if (tickData[tickData.length -1] === '\n') {
+                strBuffer.push(tickData);
+                tickData = '';
+            }
         }
         while (request.length && strBuffer.length) {
             let cb = request.shift();
